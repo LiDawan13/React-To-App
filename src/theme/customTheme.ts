@@ -1,6 +1,6 @@
-import { createTheme, ThemeOptions} from '@mui/material'
+import { createTheme} from '@mui/material'
 
-export const customTheme: ThemeOptions = createTheme({
+export const customTheme = createTheme({
     palette: {
         mode: 'dark',
         primary: {
