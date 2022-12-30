@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext, useEffect} from 'react';
 import {
   Grid,
   Box,
@@ -8,22 +8,59 @@ import {
 import { format } from 'date-fns';
 import { TaskCounter } from '../taskCounter/taskCounter';
 import { Task } from '../task/task';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { sendApiRequest } from '../helpers/sendApiRequest';
-import { ITask } from '../task/interfaces/ITask';
 import { Status } from '../createTaskForm/enums/Status';
+import { IUpdateTask } from '../createTaskForm/interfaces/IUpdateTask';
+import { countTasks } from './helpers/countTasks';
+import { ITaskApi } from './interfaces/ITaskApi';
+import { TaskStatusChangedContext } from '../../context';
 
 export const TaskArea = () => {
+  const tasksUpdatedContext = useContext(TaskStatusChangedContext);
   const { error, isLoading, data, refetch } = useQuery(
     ['tasks'],
     async () => {
-      return await sendApiRequest<ITask[]>(
+      return await sendApiRequest<ITaskApi[]>(
         'http://localhost:3200/tasks',
         'GET',
       );
     },
   );
-  console.log(data);
+
+  const updateTaskMutation = useMutation (
+    (data:IUpdateTask) => sendApiRequest(
+      'http://localhost:3200/tasks',
+        'PUT',
+        data
+    )
+  );
+
+  useEffect(()=> {
+    refetch();
+  }, [tasksUpdatedContext.updated]);
+
+  useEffect(()=> {
+    if (updateTaskMutation.isSuccess) {
+      tasksUpdatedContext.toggle();
+    }
+  }, [updateTaskMutation.isSuccess]);
+
+  function onStatusChangeHandler(e:React.ChangeEvent<HTMLInputElement>, id:string) {
+    updateTaskMutation.mutate({
+      id,
+      status: e.target.checked ? Status.inProgress : Status.todo
+    })
+  }
+
+  function markCompleteHandler(e:
+    | React.MouseEvent<HTMLButtonElement>
+    | React.MouseEvent<HTMLAnchorElement>, id:string) {
+    updateTaskMutation.mutate({
+      id,
+      status: Status.completed
+    })
+  }
 
   return (
     <Grid item md={8} px={4}>
@@ -48,9 +85,9 @@ export const TaskArea = () => {
           xs={12}
           mb={8}
         >
-          <TaskCounter />
-          <TaskCounter />
-          <TaskCounter />
+          <TaskCounter status={Status.todo} count={data ? countTasks(data, Status.todo) : undefined}/>
+          <TaskCounter status={Status.inProgress} count={data ? countTasks(data, Status.inProgress) : undefined}/>
+          <TaskCounter status={Status.completed} count={data ? countTasks(data, Status.completed) : undefined}/>
         </Grid>
         <>
           {error && (
@@ -91,6 +128,8 @@ export const TaskArea = () => {
                     description={t.description}
                     priority={t.priority}
                     status={t.status}
+                    onStatusChange={onStatusChangeHandler}
+                    onClick={markCompleteHandler}
                   />
                 ) : (false)
               );
