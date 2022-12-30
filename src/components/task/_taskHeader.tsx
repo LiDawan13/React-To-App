@@ -34,5 +34,5 @@ export const TaskHeader: FC<ITaskHeader> = (
 
 TaskHeader.propTypes = {
   title: PropTypes.string,
-  date: PropTypes.instanceOf(Date),
+  date: PropTypes.instanceOf(Date).isRequired,
 };

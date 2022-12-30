@@ -8,6 +8,7 @@ import React, { FC, ReactElement } from 'react';
 
 import { ITaskFooter } from './interfaces/ITaskFooter';
 import PropTypes from 'prop-types';
+import { Status } from '../createTaskForm/enums/Status';
 
 export const TaskFooter: FC<ITaskFooter> = (
   props,
@@ -33,6 +34,7 @@ export const TaskFooter: FC<ITaskFooter> = (
           <Switch
             onChange={(e) => onStatusChange(e)}
             color="warning"
+            defaultChecked={status === Status.inProgress}
           />
         }
       />

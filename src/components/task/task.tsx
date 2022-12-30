@@ -53,10 +53,10 @@ export const Task: FC<ITask> = (props): ReactElement => {
 
 Task.propTypes = {
   title: PropTypes.string,
-  date: PropTypes.instanceOf(Date),
+  date: PropTypes.instanceOf(Date).isRequired,
   description: PropTypes.string,
   onStatusChange: PropTypes.func,
   onClick: PropTypes.func,
-  priority: PropTypes.string,
+  priority: PropTypes.string.isRequired,
   status: PropTypes.string,
 };
